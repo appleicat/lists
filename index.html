@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title>LISTS</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script> tailwind.config = { darkMode: 'class' } </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" charset="utf-8"></script>
+        <style>
+        @import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap');
+        </style>
+        <style type="text/tailwindcss" media="screen">
+        .text-font-main { font-family: 'Comfortaa'; }
+        .break-words-anywhere { overflow-wrap: anywhere; }
+        .text-active { @apply text-black dark:text-white }
+        .text-noactive { @apply text-black/50 dark:text-white/50 }
+        input::placeholder {}
+        </style>
+    </head>
+    <body class="h-screen w-screen flex flex-col overflow-hidden text-font-main transition dark:bg-black dark:text-white">
+
+        <header class="mx-12 h-16 flex justify-between items-center border-x-4 border-b-4 border-black dark:border-white rounded-b-xl shrink-0">
+            <div class="flex items-baseline">
+                <div class="pl-8 text-3xl font-medium">LISTS</div>
+                <div class="pl-8">
+                    <label for="newListNameInput" class="cursor-pointer">
+                        NEW LIST:
+                        <input id="newListNameInput" class="px-1 bg-white dark:bg-black transition" type="text" placeholder="NAME">
+                    </label>
+                    <button id="createNewListButton" class="transition text-black/50 hover:text-black dark:text-white/70 dark:hover:text-white" type="button" name="button">CREATE</button>
+                </div>
+            </div>
+            <div class="pr-8 flex gap-1">
+                <button class="transition hover:text-black/70 dark:hover:text-white/70" id="themeLightButton" type="button" name="button">LIGHT</button>
+                <button class="transition hover:text-black/70 dark:hover:text-white/70" id="themeAutoButton" type="button" name="button">AUTO</button>
+                <button class="transition hover:text-black/70 dark:hover:text-white/70" id="themeDarkButton" type="button" name="button">DARK</button>
+            </div>
+        </header>
+
+        <div id="listsContainer" class="grow flex overflow-x-auto px-6 py-12"></div>
+
+        <script type="text/javascript">
+
+        const themeAutoButtonNode = document.getElementById('themeAutoButton');
+        const themeLightButtonNode = document.getElementById('themeLightButton');
+        const themeDarkButtonNode = document.getElementById('themeDarkButton');
+
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        };
+
+        themeAutoButtonNode.classList.add('text-noactive');
+        themeLightButtonNode.classList.add('text-noactive');
+        themeDarkButtonNode.classList.add('text-noactive');
+
+        if (!localStorage.theme) {
+            themeAutoButtonNode.classList.add('text-active');
+            themeAutoButtonNode.classList.remove('text-noactive');
+        } else if (localStorage.theme === 'light') {
+            themeLightButtonNode.classList.add('text-active');
+            themeLightButtonNode.classList.remove('text-noactive');
+        } else if (localStorage.theme === 'dark') {
+            themeDarkButtonNode.classList.add('text-active');
+            themeDarkButtonNode.classList.remove('text-noactive');
+        }
+
+        themeAutoButtonNode.addEventListener('click', () => {
+            themeAutoButtonNode.classList.add('text-active');
+            themeAutoButtonNode.classList.remove('text-noactive');
+
+            themeLightButtonNode.classList.remove('text-active');
+            themeLightButtonNode.classList.add('text-noactive');
+
+            themeDarkButtonNode.classList.remove('text-active');
+            themeDarkButtonNode.classList.add('text-noactive');
+
+            localStorage.removeItem('theme');
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark')
+            } else {
+                document.documentElement.classList.remove('dark')
+            };
+        });
+
+        themeLightButtonNode.addEventListener('click', () => {
+            themeAutoButtonNode.classList.remove('text-active');
+            themeAutoButtonNode.classList.add('text-noactive');
+
+            themeLightButtonNode.classList.add('text-active');
+            themeLightButtonNode.classList.remove('text-noactive');
+
+            themeDarkButtonNode.classList.remove('text-active');
+            themeDarkButtonNode.classList.add('text-noactive');
+
+            localStorage.theme = 'light';
+            document.documentElement.classList.remove('dark');
+        });
+
+        themeDarkButtonNode.addEventListener('click', () => {
+            themeAutoButtonNode.classList.remove('text-active');
+            themeAutoButtonNode.classList.add('text-noactive');
+
+            themeLightButtonNode.classList.remove('text-active');
+            themeLightButtonNode.classList.add('text-noactive');
+
+            themeDarkButtonNode.classList.add('text-active');
+            themeDarkButtonNode.classList.remove('text-noactive');
+
+            localStorage.theme = 'dark';
+            document.documentElement.classList.add('dark');
+        });
+
+        const newListNameInputNode = document.getElementById('newListNameInput');
+        const createNewListButtonNode = document.getElementById('createNewListButton');
+        const listsContainerNode = document.getElementById('listsContainer');
+
+        function createNewList(name, id) {
+            let newList = document.createElement('div');
+            newList.classList.add('mx-6', 'w-96', 'max-w-full', 'border-4', 'border-black', 'dark:border-white', 'rounded-xl', 'divide-y-2', 'divide-black', 'dark:divide-white', 'overflow-hidden', 'flex', 'flex-col', 'shrink-0');
+            newList.setAttribute('id', id);
+            newList.innerHTML = `
+                <div id="head" class="p-4 flex justify-between items-baseline">
+                    <div class="text-2xl font-medium truncate">${name}</div>
+                    <div id="headButtons" class="text-sm">
+                        <button id="deleteListButton" class="transition text-black/50 hover:text-[#ff0000] dark:text-white/70 dark:hover:text-[#ff0000]" type="button" name="button">DEL</button>
+                    </div>
+                </div>
+                <div id="container" class="grow px-2 py-4 overflow-y-auto overflow-x-hidden flex flex-col gap-3"></div>
+                <div id="foot" class="p-4 flex">
+                    <button id="newEntryButton" class="px-2" type="button" name="button">+</button>
+                    <input id="newEntryInput" class="ml-2 px-1 w-full bg-white dark:bg-black transition" type="text" placeholder="NEW">
+                </div>
+            `
+            return newList;
+        }
+
+        function createNewEntry(entry, id) {
+            let newEntry = document.createElement('div');
+            newEntry.classList.add('flex', 'items-start');
+            newEntry.setAttribute('id', id);
+            newEntry.innerHTML = `
+                <button id="deleteEntryButton" class="px-2" type="button" name="button">-</button>
+                <div class="break-words-anywhere">${entry}</div>
+            `
+            return newEntry;
+        }
+
+        function appendEntry(event) {
+            if (event.target.parentNode.children['newEntryInput'].value) {
+                let entry = event.target.parentNode.children['newEntryInput'].value;
+                event.target.parentNode.children['newEntryInput'].value = '';
+                let id = `${Math.random()}`;
+                event.target.parentNode.parentNode.children['container'].appendChild(createNewEntry(entry, id)).scrollIntoView({behavior: 'smooth'});
+                updateEventListeners();
+                let lists = JSON.parse(localStorage.lists);
+                lists[event.target.parentNode.parentNode.id].entries[id] = entry;
+                localStorage.lists = JSON.stringify(lists);
+                anime({
+                    targets: event.target.parentNode.parentNode.children['container'].children[id],
+                    opacity: [0, 1],
+                    easing: 'easeInOutSine',
+                    duration: 100,
+                });
+            }
+        }
+        function deleteList(event) {
+            let lists = JSON.parse(localStorage.lists);
+            delete lists[event.target.parentNode.parentNode.parentNode.id];
+            localStorage.lists = JSON.stringify(lists);
+            if (event.target.parentNode.parentNode.parentNode.parentNode.scrollWidth < event.target.parentNode.parentNode.parentNode.parentNode.offsetWidth + event.target.parentNode.parentNode.parentNode.parentNode.scrollLeft + 432) { event.target.parentNode.parentNode.parentNode.parentNode.scrollBy({ left: -(432 - (event.target.parentNode.parentNode.parentNode.parentNode.scrollWidth - (event.target.parentNode.parentNode.parentNode.parentNode.offsetWidth + event.target.parentNode.parentNode.parentNode.parentNode.scrollLeft))), behavior: 'smooth' }) };
+            anime({
+                targets: event.target.parentNode.parentNode.parentNode,
+                opacity: [1, 0],
+                easing: 'easeInOutSine',
+                duration: 500,
+            }).finished
+            .then(() => { event.target.parentNode.parentNode.parentNode.parentNode.removeChild(event.target.parentNode.parentNode.parentNode) })
+            .then((function animateAllNextElementSiblings(element) {
+                if (element.nextElementSibling) {
+                    anime({
+                        targets: element.nextElementSibling,
+                        translateX: [
+                            { value: '-432px', duration: 500},
+                            { value: '0', duration: 0},
+                        ],
+                        easing: 'easeInOutExpo',
+                    });
+                    animateAllNextElementSiblings(element.nextElementSibling);
+                }
+            })(event.target.parentNode.parentNode.parentNode));
+        }
+        function deleteEntry(event) {
+            let lists = JSON.parse(localStorage.lists);
+            delete lists[event.target.parentNode.parentNode.parentNode.id].entries[event.target.parentNode.id];
+            localStorage.lists = JSON.stringify(lists);
+            if (event.target.parentNode.parentNode.scrollHeight < event.target.parentNode.parentNode.offsetHeight + event.target.parentNode.parentNode.scrollTop + event.target.parentNode.offsetHeight + 12) { event.target.parentNode.parentNode.scrollBy({ top: -((event.target.parentNode.offsetHeight + 12) - (event.target.parentNode.parentNode.scrollHeight - (event.target.parentNode.parentNode.offsetHeight + event.target.parentNode.parentNode.scrollTop))), behavior: 'smooth' }) };
+            anime({
+                targets: event.target.parentNode,
+                opacity: [1, 0],
+                easing: 'easeInOutSine',
+                duration: 300,
+            }).finished
+            .then(() => { event.target.parentNode.parentNode.removeChild(event.target.parentNode) })
+            .then((function animateAllNextElementSiblings(element) {
+                if (element.nextElementSibling) {
+                    anime({
+                        targets: element.nextElementSibling,
+                        translateY: [
+                            { value: `-${event.target.parentNode.offsetHeight + 12}px`, duration: 300},
+                            { value: '0', duration: 0},
+                        ],
+                        easing: 'easeInOutSine',
+                    });
+                    animateAllNextElementSiblings(element.nextElementSibling);
+                }
+            })(event.target.parentNode));
+        }
+        function updateEventListeners() {
+            for (list of listsContainerNode.children) {
+                list.children['foot'].children['newEntryButton'].addEventListener('click', appendEntry);
+                list.children['head'].children['headButtons'].children['deleteListButton'].addEventListener('click', deleteList);
+                for (entry of list.children['container'].children) {
+                    entry.children['deleteEntryButton'].addEventListener('click', deleteEntry);
+                }
+            }
+        }
+
+        createNewListButtonNode.addEventListener('click', () => {
+            if (newListNameInputNode.value) {
+                name = newListNameInputNode.value;
+                newListNameInputNode.value = '';
+            } else {
+                name = `List #${listsContainerNode.childElementCount + 1}`;
+            }
+            let id = `${Math.random()}`;
+            listsContainerNode.appendChild(createNewList(name, id)).scrollIntoView({behavior: 'smooth', inline: 'start'});
+            updateEventListeners();
+            let lists = JSON.parse(localStorage.lists);
+            lists[id] = {
+                name: name,
+                entries: {}
+            }
+            localStorage.lists = JSON.stringify(lists);
+            anime({
+                targets: listsContainerNode.children[id],
+                opacity: [0, 1],
+                easing: 'easeInOutExpo',
+                duration: 300,
+            });
+        });
+
+        (function render() {
+            if (!localStorage.lists) { localStorage.lists = JSON.stringify({}) };
+            let lists = JSON.parse(localStorage.lists);
+            for (listId of Object.keys(lists)) {
+                listsContainerNode.appendChild(createNewList(lists[listId].name, listId));
+                let list = document.getElementById(listId);
+                for (entryId of Object.keys(lists[listId].entries)) {
+                    list.children['container'].appendChild(createNewEntry(lists[listId].entries[entryId], entryId));
+                }
+            }
+            updateEventListeners();
+        })()
+
+        anime({
+            targets: 'header',
+            opacity: [0, 1],
+            easing: 'easeInOutSine',
+            duration: 300,
+        });
+
+        anime({
+            targets: listsContainerNode.children,
+            opacity: [0, 1],
+            easing: 'easeInOutExpo',
+            duration: 500,
+            delay: anime.stagger(50),
+        });
+
+        </script>
+    </body>
+</html>
