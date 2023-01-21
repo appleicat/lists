@@ -37,7 +37,7 @@
             </div>
         </header>
 
-        <div id="listsContainer" class="grow flex overflow-x-auto px-6 py-12"></div>
+        <div id="listsContainer" class="grow flex overflow-x-auto p-12 gap-12"></div>
 
         <script type="text/javascript">
 
@@ -118,7 +118,7 @@
 
         function createNewList(name, id) {
             let newList = document.createElement('div');
-            newList.classList.add('mx-6', 'w-96', 'max-w-full', 'border-4', 'border-black', 'dark:border-white', 'rounded-xl', 'divide-y-2', 'divide-black', 'dark:divide-white', 'overflow-hidden', 'flex', 'flex-col', 'shrink-0');
+            newList.classList.add('w-96', 'max-w-full', 'border-4', 'border-black', 'dark:border-white', 'rounded-xl', 'divide-y-2', 'divide-black', 'dark:divide-white', 'overflow-hidden', 'flex', 'flex-col', 'shrink-0');
             newList.setAttribute('id', id);
             newList.innerHTML = `
                 <div id="head" class="p-4 flex justify-between items-baseline">
