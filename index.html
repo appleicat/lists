@@ -12,9 +12,12 @@
         <style type="text/tailwindcss" media="screen">
         .text-font-main { font-family: 'Comfortaa'; }
         .break-words-anywhere { overflow-wrap: anywhere; }
-        .text-active { @apply text-black dark:text-white }
-        .text-noactive { @apply text-black/50 dark:text-white/50 }
+        .text-active { @apply text-black dark:text-white; }
+        .text-noactive { @apply text-black/50 dark:text-white/50; }
         input::placeholder {}
+        ::-webkit-scrollbar { @apply w-0 h-2 hidden; }
+        ::-webkit-scrollbar-track {}
+        ::-webkit-scrollbar-thumb { @apply bg-black rounded-t-xl; }
         </style>
     </head>
     <body class="h-screen w-screen flex flex-col overflow-hidden text-font-main transition dark:bg-black dark:text-white">
