@@ -119,49 +119,65 @@
         const createNewListButtonNode = document.getElementById('createNewListButton');
         const listsContainerNode = document.getElementById('listsContainer');
 
-        function createNewList(name, id) {
-            let newList = document.createElement('div');
-            newList.classList.add('w-96', 'max-w-full', 'border-4', 'border-black', 'dark:border-white', 'rounded-xl', 'divide-y-2', 'divide-black', 'dark:divide-white', 'overflow-hidden', 'flex', 'flex-col', 'shrink-0');
-            newList.setAttribute('id', id);
-            newList.innerHTML = `
-                <div id="head" class="p-4 flex justify-between items-baseline">
-                    <div class="text-2xl font-medium truncate">${name}</div>
-                    <div id="headButtons" class="text-sm">
-                        <button id="deleteListButton" class="transition text-black/50 hover:text-[#ff0000] dark:text-white/70 dark:hover:text-[#ff0000]" type="button" name="button">DEL</button>
+        class List {
+            constructor(name, id) {
+                this.name = name;
+                this.id = id;
+            }
+            createNode() {
+                let newList = document.createElement('div');
+                newList.classList.add('w-96', 'max-w-full', 'border-4', 'border-black', 'dark:border-white', 'rounded-xl', 'divide-y-2', 'divide-black', 'dark:divide-white', 'overflow-hidden', 'flex', 'flex-col', 'shrink-0');
+                newList.setAttribute('id', this.id);
+                newList.innerHTML = `
+                    <div id="head" class="p-4 flex justify-between items-center">
+                        <div id="headName" class="text-2xl font-medium truncate">${this.name}</div>
+                        <div id="headButtons" class="text-xs shrink-0">
+                            <button id="renameListButton" class="transition text-black/50 hover:text-green-500 dark:text-white/70 dark:hover:text-green-500" type="button" name="button" data-active="false">REN</button>
+                            <button id="clearListButton" class="transition text-black/50 hover:text-cyan-500 dark:text-white/70 dark:hover:text-cyan-500" type="button" name="button">CLR</button>
+                            <button id="deleteListButton" class="transition text-black/50 hover:text-[#ff0000] dark:text-white/70 dark:hover:text-[#ff0000]" type="button" name="button">DEL</button>
+                        </div>
                     </div>
-                </div>
-                <div id="container" class="grow px-2 py-4 overflow-y-auto overflow-x-hidden flex flex-col gap-3"></div>
-                <div id="foot" class="p-4 flex">
-                    <button id="newEntryButton" class="px-2" type="button" name="button">+</button>
-                    <input id="newEntryInput" class="ml-2 px-1 w-full bg-white dark:bg-black transition" type="text" placeholder="NEW">
-                </div>
-            `
-            return newList;
+                    <div id="container" class="grow px-2 py-4 overflow-y-auto overflow-x-hidden flex flex-col gap-3"></div>
+                    <div id="foot" class="p-4 flex">
+                        <button id="newEntryButton" class="px-2 transition text-black/50 hover:text-black dark:text-white/70 dark:hover:text-white text-xs" type="button" name="button">NEW</button>
+                        <input id="newEntryInput" class="ml-2 px-1 w-full bg-white dark:bg-black transition" type="text" placeholder="">
+                    </div>
+                `
+                return newList;
+            }
         }
 
-        function createNewEntry(entry, id) {
-            let newEntry = document.createElement('div');
-            newEntry.classList.add('flex', 'items-start');
-            newEntry.setAttribute('id', id);
-            newEntry.innerHTML = `
-                <button id="deleteEntryButton" class="px-2" type="button" name="button">-</button>
-                <div class="break-words-anywhere">${entry}</div>
-            `
-            return newEntry;
+        class Entry {
+            constructor(entry, id) {
+                this.entry = entry;
+                this.id = id;
+            }
+            createNode() {
+                let newEntry = document.createElement('div');
+                newEntry.classList.add('flex', 'items-baseline', 'shrink-0', 'px-2', 'gap-1');
+                newEntry.setAttribute('id', this.id);
+                newEntry.innerHTML = `
+                    <div id="entryButtons" class="h-full flex gap-px items-start text-xs shrink-0">
+                        <button id="deleteEntryButton" class="leading-none transition text-black/50 hover:text-[#ff0000] dark:text-white/70 dark:hover:text-[#ff0000]" type="button" name="button">D</button>
+                        <button id="editEntryButton" class="leading-none transition text-black/50 hover:text-green-500 dark:text-white/70 dark:hover:text-green-500" type="button" name="button" data-active="false">E</button>
+                    </div>
+                    <div id="entry" class="break-words-anywhere">${this.entry}</div>
+                `
+                return newEntry;
+            }
         }
 
         function appendEntry(event) {
             if (event.target.parentNode.children['newEntryInput'].value) {
-                let entry = event.target.parentNode.children['newEntryInput'].value;
+                let newEntry = new Entry(event.target.parentNode.children['newEntryInput'].value, Math.random());
                 event.target.parentNode.children['newEntryInput'].value = '';
-                let id = `${Math.random()}`;
-                event.target.parentNode.parentNode.children['container'].appendChild(createNewEntry(entry, id)).scrollIntoView({behavior: 'smooth'});
+                event.target.parentNode.parentNode.children['container'].appendChild(newEntry.createNode()).scrollIntoView({behavior: 'smooth'});
                 updateEventListeners();
                 let lists = JSON.parse(localStorage.lists);
-                lists[event.target.parentNode.parentNode.id].entries[id] = entry;
+                lists[event.target.parentNode.parentNode.id].entries[newEntry.id] = newEntry.entry;
                 localStorage.lists = JSON.stringify(lists);
                 anime({
-                    targets: event.target.parentNode.parentNode.children['container'].children[id],
+                    targets: event.target.parentNode.parentNode.children['container'].children[newEntry.id],
                     opacity: [0, 1],
                     easing: 'easeInOutSine',
                     duration: 100,
@@ -194,60 +210,109 @@
                 }
             })(event.target.parentNode.parentNode.parentNode));
         }
+        function clearList(event) {
+            let lists = JSON.parse(localStorage.lists);
+            for (entryId of Object.keys(lists[event.target.parentNode.parentNode.parentNode.id].entries)) {
+                anime({
+                    targets: event.target.parentNode.parentNode.parentNode.children['container'].children[entryId],
+                    opacity: [1, 0],
+                    easing: 'easeInOutSine',
+                    duration: 300,
+                })
+            }
+            setTimeout(() => {
+                for (entryId of Object.keys(lists[event.target.parentNode.parentNode.parentNode.id].entries)) {
+                    delete lists[event.target.parentNode.parentNode.parentNode.id].entries[entryId];
+                    event.target.parentNode.parentNode.parentNode.children['container'].removeChild(event.target.parentNode.parentNode.parentNode.children['container'].children[entryId]);
+                }
+                localStorage.lists = JSON.stringify(lists);
+            }, 300);
+        }
+        function renameList(event) {
+            if (event.target.dataset.active == 'false') {
+                event.target.dataset.active = 'true';
+                event.target.classList.add('text-green-500', 'dark:text-green-500');
+                event.target.parentNode.parentNode.children['headName'].outerHTML = `<input id="headName" class="mr-2 text-2xl font-medium truncate bg-white dark:bg-black transition" type="text" placeholder="NAME" value="${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.id].name}">`;
+                event.target.parentNode.parentNode.children['headName'].focus();
+                event.target.parentNode.parentNode.children['headName'].addEventListener('input', getNameOnInput = () => {
+                    let lists = JSON.parse(localStorage.lists);
+                    lists[event.target.parentNode.parentNode.parentNode.id].name = event.target.parentNode.parentNode.children['headName'].value;
+                    localStorage.lists = JSON.stringify(lists);
+                });
+            } else {
+                event.target.dataset.active = 'false';
+                event.target.classList.remove('text-green-500', 'dark:text-green-500');
+                event.target.parentNode.parentNode.children['headName'].removeEventListener('input', getNameOnInput);
+                event.target.parentNode.parentNode.children['headName'].outerHTML = `<div id="headName" class="text-2xl font-medium truncate">${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.id].name}</div>`;
+            }
+        }
         function deleteEntry(event) {
             let lists = JSON.parse(localStorage.lists);
-            delete lists[event.target.parentNode.parentNode.parentNode.id].entries[event.target.parentNode.id];
+            delete lists[event.target.parentNode.parentNode.parentNode.parentNode.id].entries[event.target.parentNode.parentNode.id];
             localStorage.lists = JSON.stringify(lists);
-            if (event.target.parentNode.parentNode.scrollHeight < event.target.parentNode.parentNode.offsetHeight + event.target.parentNode.parentNode.scrollTop + event.target.parentNode.offsetHeight + 12) { event.target.parentNode.parentNode.scrollBy({ top: -((event.target.parentNode.offsetHeight + 12) - (event.target.parentNode.parentNode.scrollHeight - (event.target.parentNode.parentNode.offsetHeight + event.target.parentNode.parentNode.scrollTop))), behavior: 'smooth' }) };
+            if (event.target.parentNode.parentNode.parentNode.scrollHeight < event.target.parentNode.parentNode.parentNode.offsetHeight + event.target.parentNode.parentNode.parentNode.scrollTop + event.target.parentNode.parentNode.offsetHeight + 12) { event.target.parentNode.parentNode.parentNode.scrollBy({ top: -((event.target.parentNode.parentNode.offsetHeight + 12) - (event.target.parentNode.parentNode.parentNode.scrollHeight - (event.target.parentNode.parentNode.parentNode.offsetHeight + event.target.parentNode.parentNode.parentNode.scrollTop))), behavior: 'smooth' }) };
             anime({
-                targets: event.target.parentNode,
+                targets: event.target.parentNode.parentNode,
                 opacity: [1, 0],
                 easing: 'easeInOutSine',
                 duration: 300,
             }).finished
-            .then(() => { event.target.parentNode.parentNode.removeChild(event.target.parentNode) })
+            .then(() => { event.target.parentNode.parentNode.parentNode.removeChild(event.target.parentNode.parentNode) })
             .then((function animateAllNextElementSiblings(element) {
                 if (element.nextElementSibling) {
                     anime({
                         targets: element.nextElementSibling,
                         translateY: [
-                            { value: `-${event.target.parentNode.offsetHeight + 12}px`, duration: 300},
+                            { value: `-${event.target.parentNode.parentNode.offsetHeight + 12}px`, duration: 300},
                             { value: '0', duration: 0},
                         ],
                         easing: 'easeInOutSine',
                     });
                     animateAllNextElementSiblings(element.nextElementSibling);
                 }
-            })(event.target.parentNode));
+            })(event.target.parentNode.parentNode));
+        }
+        function editEntry(event) {
+            if (event.target.dataset.active == 'false') {
+                event.target.dataset.active = 'true';
+                event.target.classList.add('text-green-500', 'dark:text-green-500');
+                event.target.parentNode.parentNode.children['entry'].outerHTML = `<input id="entry" class="w-full bg-white dark:bg-black transition" type="text" value="${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.parentNode.id].entries[event.target.parentNode.parentNode.id]}">`;
+                event.target.parentNode.parentNode.children['entry'].focus();
+                event.target.parentNode.parentNode.children['entry'].addEventListener('input', getEntryOnInput = () => {
+                    let lists = JSON.parse(localStorage.lists);
+                    lists[event.target.parentNode.parentNode.parentNode.parentNode.id].entries[event.target.parentNode.parentNode.id] = event.target.parentNode.parentNode.children['entry'].value;
+                    localStorage.lists = JSON.stringify(lists);
+                });
+            } else {
+                event.target.dataset.active = 'false';
+                event.target.classList.remove('text-green-500', 'dark:text-green-500');
+                event.target.parentNode.parentNode.children['entry'].removeEventListener('input', getEntryOnInput);
+                event.target.parentNode.parentNode.children['entry'].outerHTML = `<div id="entry" class="break-words-anywhere">${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.parentNode.id].entries[event.target.parentNode.parentNode.id]}</div>`;
+            }
         }
         function updateEventListeners() {
             for (list of listsContainerNode.children) {
                 list.children['foot'].children['newEntryButton'].addEventListener('click', appendEntry);
                 list.children['head'].children['headButtons'].children['deleteListButton'].addEventListener('click', deleteList);
+                list.children['head'].children['headButtons'].children['clearListButton'].addEventListener('click', clearList);
+                list.children['head'].children['headButtons'].children['renameListButton'].addEventListener('click', renameList);
                 for (entry of list.children['container'].children) {
-                    entry.children['deleteEntryButton'].addEventListener('click', deleteEntry);
+                    entry.children['entryButtons'].children['deleteEntryButton'].addEventListener('click', deleteEntry);
+                    entry.children['entryButtons'].children['editEntryButton'].addEventListener('click', editEntry);
                 }
             }
         }
 
         createNewListButtonNode.addEventListener('click', () => {
-            if (newListNameInputNode.value) {
-                name = newListNameInputNode.value;
-                newListNameInputNode.value = '';
-            } else {
-                name = `List #${listsContainerNode.childElementCount + 1}`;
-            }
-            let id = `${Math.random()}`;
-            listsContainerNode.appendChild(createNewList(name, id)).scrollIntoView({behavior: 'smooth', inline: 'start'});
+            let newList = new List((newListNameInputNode.value) ? newListNameInputNode.value : `List #${listsContainerNode.childElementCount + 1}`, Math.random());
+            newListNameInputNode.value = '';
+            listsContainerNode.appendChild(newList.createNode()).scrollIntoView({behavior: 'smooth', inline: 'start'});
             updateEventListeners();
             let lists = JSON.parse(localStorage.lists);
-            lists[id] = {
-                name: name,
-                entries: {}
-            }
+            lists[newList.id] = { name: newList.name, entries: {} };
             localStorage.lists = JSON.stringify(lists);
             anime({
-                targets: listsContainerNode.children[id],
+                targets: listsContainerNode.children[newList.id],
                 opacity: [0, 1],
                 easing: 'easeInOutExpo',
                 duration: 300,
@@ -258,10 +323,12 @@
             if (!localStorage.lists) { localStorage.lists = JSON.stringify({}) };
             let lists = JSON.parse(localStorage.lists);
             for (listId of Object.keys(lists)) {
-                listsContainerNode.appendChild(createNewList(lists[listId].name, listId));
+                let newList = new List(lists[listId].name, listId)
+                listsContainerNode.appendChild(newList.createNode());
                 let list = document.getElementById(listId);
                 for (entryId of Object.keys(lists[listId].entries)) {
-                    list.children['container'].appendChild(createNewEntry(lists[listId].entries[entryId], entryId));
+                    let newEntry = new Entry(lists[listId].entries[entryId], entryId)
+                    list.children['container'].appendChild(newEntry.createNode());
                 }
             }
             updateEventListeners();
