@@ -12,35 +12,44 @@
         <style type="text/tailwindcss" media="screen">
         .text-font-main { font-family: 'Comfortaa'; }
         .break-words-anywhere { overflow-wrap: anywhere; }
-        .text-active { @apply text-black dark:text-white; }
-        .text-noactive { @apply text-black/50 dark:text-white/50; }
-        input::placeholder {}
+        .text-active { @apply text-[#333333] }
+        .text-noactive { @apply text-[#333333]/50 }
+        .animation-hue-rotate { animation: hue-rotate 60s linear infinite; }
+        @keyframes hue-rotate { from{filter: hue-rotate(0deg);} to{filter: hue-rotate(360deg);} }
+        input { @apply rounded overflow-hidden ring-2 ring-[#444444] }
+        input:focus { @apply outline-none }
+        input::placeholder { @apply text-[#333333]/30 }
         ::-webkit-scrollbar { @apply w-0 h-2 hidden; }
         ::-webkit-scrollbar-track {}
         ::-webkit-scrollbar-thumb { @apply bg-black rounded-t-xl; }
+        ::selection { @apply bg-black/10 }
         </style>
     </head>
-    <body class="h-screen w-screen flex flex-col overflow-hidden text-font-main transition dark:bg-black dark:text-white">
-
-        <header class="mx-12 h-16 flex justify-between items-center border-x-4 border-b-4 border-black dark:border-white rounded-b-xl shrink-0">
-            <div class="flex items-baseline">
-                <div class="pl-8 text-3xl font-medium">LISTS</div>
-                <div class="pl-8">
-                    <label for="newListNameInput" class="cursor-pointer">
-                        NEW LIST:
-                        <input id="newListNameInput" class="px-1 bg-white dark:bg-black transition" type="text" placeholder="NAME">
-                    </label>
-                    <button id="createNewListButton" class="transition text-black/50 hover:text-black dark:text-white/70 dark:hover:text-white" type="button" name="button">CREATE</button>
+    <body class="h-screen w-screen overflow-hidden text-font-main transition text-[#333333]">
+        <div id="bgColor" class="z-[-1] absolute h-full w-full transition animation-hue-rotate bg-gradient-to-r from-[#f0fbff] to-[#f1f0ff]"></div>
+        <div class="h-full w-full flex flex-col">
+            <div id="headerColor" class="absolute overflow-hidden z-[-1] px-12 w-full"><div class="rounded-b-xl h-16 w-full transition animation-hue-rotate bg-gradient-to-r from-[#dfe1fb] to-[#c9f3f3]"></div></div>
+            <header class="mx-12 h-16 flex justify-between items-center border-x-4 border-b-4 border-[#444444] rounded-b-xl shrink-0">
+                <div class="flex items-center">
+                    <div class="ml-8 pt-2 py-1 px-3 bg-white border-2 border-[#444444] rounded-lg">
+                        <div class="cursor-default text-2xl font-medium transition animation-hue-rotate bg-clip-text text-transparent bg-[#97a2ff]">LISTS</div>
+                    </div>
+                    <div class="ml-8 pt-1.5 py-1 px-3 bg-white rounded-md border-2 border-[#444444]">
+                        <label for="newListNameInput" class="cursor-pointer">
+                            NEW LIST:
+                            <input id="newListNameInput" class="px-1 bg-transparent transition ring-0" type="text" placeholder="NAME">
+                        </label>
+                        <button id="createNewListButton" class="transition text-[#333333]/50 hover:text-[#333333]" type="button" name="button">CREATE</button>
+                    </div>
                 </div>
-            </div>
-            <div class="pr-8 flex gap-1">
-                <button class="transition hover:text-black/70 dark:hover:text-white/70" id="themeLightButton" type="button" name="button">LIGHT</button>
-                <button class="transition hover:text-black/70 dark:hover:text-white/70" id="themeAutoButton" type="button" name="button">AUTO</button>
-                <button class="transition hover:text-black/70 dark:hover:text-white/70" id="themeDarkButton" type="button" name="button">DARK</button>
-            </div>
-        </header>
-
-        <div id="listsContainer" class="grow flex overflow-x-auto p-12 gap-12"></div>
+                <div class="mr-8 pt-[3px] px-3 flex gap-1 border-2 border-[#444444] rounded bg-white">
+                    <button class="transition hover:text-[#333333]/70" id="themeLightButton" type="button" name="button">LIGHT</button>
+                    <button class="transition hover:text-[#333333]/70" id="themeAutoButton" type="button" name="button">AUTO</button>
+                    <button class="transition hover:text-[#333333]/70" id="themeDarkButton" type="button" name="button">DARK</button>
+                </div>
+            </header>
+            <div id="listsContainer" class="grow flex overflow-x-auto p-12 gap-12"></div>
+        </div>
 
         <script type="text/javascript">
 
@@ -126,21 +135,21 @@
             }
             createNode() {
                 let newList = document.createElement('div');
-                newList.classList.add('w-96', 'max-w-full', 'border-4', 'border-black', 'dark:border-white', 'rounded-xl', 'divide-y-2', 'divide-black', 'dark:divide-white', 'overflow-hidden', 'flex', 'flex-col', 'shrink-0');
+                newList.classList.add('w-96', 'max-w-full', 'border-4', 'border-[#444444]', 'rounded-xl', 'divide-y-2', 'divide-[#444444]', 'overflow-hidden', 'flex', 'flex-col', 'shrink-0', 'backdrop-brightness-[1.035]');
                 newList.setAttribute('id', this.id);
                 newList.innerHTML = `
                     <div id="head" class="p-4 flex justify-between items-center">
                         <div id="headName" class="text-2xl font-medium truncate">${this.name}</div>
-                        <div id="headButtons" class="text-xs shrink-0">
-                            <button id="renameListButton" class="transition text-black/50 hover:text-green-500 dark:text-white/70 dark:hover:text-green-500" type="button" name="button" data-active="false">REN</button>
-                            <button id="clearListButton" class="transition text-black/50 hover:text-cyan-500 dark:text-white/70 dark:hover:text-cyan-500" type="button" name="button">CLR</button>
-                            <button id="deleteListButton" class="transition text-black/50 hover:text-[#ff0000] dark:text-white/70 dark:hover:text-[#ff0000]" type="button" name="button">DEL</button>
+                        <div id="headButtons" class="text-xs shrink-0 cursor-default">
+                            <button id="renameListButton" class="transition text-[#333333]/50 hover:text-green-500" type="button" name="button" data-active="false">REN</button>
+                            <button id="clearListButton" class="transition text-[#333333]/50 hover:text-cyan-500" type="button" name="button">CLR</button>
+                            <button id="deleteListButton" class="transition text-[#333333]/50 hover:text-[#ff0000]" type="button" name="button">DEL</button>
                         </div>
                     </div>
                     <div id="container" class="grow px-2 py-4 overflow-y-auto overflow-x-hidden flex flex-col gap-3"></div>
                     <div id="foot" class="p-4 flex">
-                        <button id="newEntryButton" class="px-2 transition text-black/50 hover:text-black dark:text-white/70 dark:hover:text-white text-xs" type="button" name="button">NEW</button>
-                        <input id="newEntryInput" class="ml-2 px-1 w-full bg-white dark:bg-black transition" type="text" placeholder="">
+                        <button id="newEntryButton" class="px-2 transition text-[#333333]/50 hover:text-[#333333] text-xs" type="button" name="button">NEW</button>
+                        <input id="newEntryInput" class="ml-2 px-1 w-full bg-transparent transition" type="text" placeholder="">
                     </div>
                 `
                 return newList;
@@ -158,8 +167,8 @@
                 newEntry.setAttribute('id', this.id);
                 newEntry.innerHTML = `
                     <div id="entryButtons" class="h-full flex gap-px items-start text-xs shrink-0">
-                        <button id="deleteEntryButton" class="leading-none transition text-black/50 hover:text-[#ff0000] dark:text-white/70 dark:hover:text-[#ff0000]" type="button" name="button">D</button>
-                        <button id="editEntryButton" class="leading-none transition text-black/50 hover:text-green-500 dark:text-white/70 dark:hover:text-green-500" type="button" name="button" data-active="false">E</button>
+                        <button id="deleteEntryButton" class="leading-none transition text-[#333333]/50 hover:text-[#ff0000]" type="button" name="button">D</button>
+                        <button id="editEntryButton" class="leading-none transition text-[#333333]/50 hover:text-green-500" type="button" name="button" data-active="false">E</button>
                     </div>
                     <div id="entry" class="break-words-anywhere">${this.entry}</div>
                 `
@@ -231,8 +240,8 @@
         function renameList(event) {
             if (event.target.dataset.active == 'false') {
                 event.target.dataset.active = 'true';
-                event.target.classList.add('text-green-500', 'dark:text-green-500');
-                event.target.parentNode.parentNode.children['headName'].outerHTML = `<input id="headName" class="mr-2 text-2xl font-medium truncate bg-white dark:bg-black transition" type="text" placeholder="NAME" value="${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.id].name}">`;
+                event.target.classList.add('text-green-500');
+                event.target.parentNode.parentNode.children['headName'].outerHTML = `<input id="headName" class="mr-2 text-2xl font-medium truncate bg-transparent transition" type="text" placeholder="NAME" value="${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.id].name}">`;
                 event.target.parentNode.parentNode.children['headName'].focus();
                 event.target.parentNode.parentNode.children['headName'].addEventListener('input', getNameOnInput = () => {
                     let lists = JSON.parse(localStorage.lists);
@@ -241,7 +250,7 @@
                 });
             } else {
                 event.target.dataset.active = 'false';
-                event.target.classList.remove('text-green-500', 'dark:text-green-500');
+                event.target.classList.remove('text-green-500');
                 event.target.parentNode.parentNode.children['headName'].removeEventListener('input', getNameOnInput);
                 event.target.parentNode.parentNode.children['headName'].outerHTML = `<div id="headName" class="text-2xl font-medium truncate">${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.id].name}</div>`;
             }
@@ -275,8 +284,8 @@
         function editEntry(event) {
             if (event.target.dataset.active == 'false') {
                 event.target.dataset.active = 'true';
-                event.target.classList.add('text-green-500', 'dark:text-green-500');
-                event.target.parentNode.parentNode.children['entry'].outerHTML = `<input id="entry" class="w-full bg-white dark:bg-black transition" type="text" value="${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.parentNode.id].entries[event.target.parentNode.parentNode.id]}">`;
+                event.target.classList.add('text-green-500');
+                event.target.parentNode.parentNode.children['entry'].outerHTML = `<input id="entry" class="w-full bg-transparent transition" type="text" value="${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.parentNode.id].entries[event.target.parentNode.parentNode.id]}">`;
                 event.target.parentNode.parentNode.children['entry'].focus();
                 event.target.parentNode.parentNode.children['entry'].addEventListener('input', getEntryOnInput = () => {
                     let lists = JSON.parse(localStorage.lists);
@@ -285,7 +294,7 @@
                 });
             } else {
                 event.target.dataset.active = 'false';
-                event.target.classList.remove('text-green-500', 'dark:text-green-500');
+                event.target.classList.remove('text-green-500');
                 event.target.parentNode.parentNode.children['entry'].removeEventListener('input', getEntryOnInput);
                 event.target.parentNode.parentNode.children['entry'].outerHTML = `<div id="entry" class="break-words-anywhere">${JSON.parse(localStorage.lists)[event.target.parentNode.parentNode.parentNode.parentNode.id].entries[event.target.parentNode.parentNode.id]}</div>`;
             }
@@ -335,7 +344,7 @@
         })()
 
         anime({
-            targets: 'header',
+            targets: ['header', '#headerColor'],
             opacity: [0, 1],
             easing: 'easeInOutSine',
             duration: 300,
