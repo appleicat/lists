@@ -32,7 +32,7 @@
             <header class="mx-12 h-16 flex justify-between items-center border-x-4 border-b-4 border-[#444444] rounded-b-xl shrink-0">
                 <div class="flex items-center">
                     <div class="ml-8 pt-2 py-1 px-3 bg-white border-2 border-[#444444] rounded-lg">
-                        <div class="cursor-default text-2xl font-medium transition animation-hue-rotate bg-clip-text text-transparent bg-[#97a2ff]">LISTS</div>
+                        <div class="cursor-default select-none text-2xl font-medium transition animation-hue-rotate bg-clip-text text-transparent bg-[#97a2ff]">LISTS</div>
                     </div>
                     <div class="ml-8 pt-1.5 py-1 px-3 bg-white rounded-md border-2 border-[#444444]">
                         <label for="newListNameInput" class="cursor-pointer">
@@ -302,6 +302,7 @@
         function updateEventListeners() {
             for (list of listsContainerNode.children) {
                 list.children['foot'].children['newEntryButton'].addEventListener('click', appendEntry);
+                list.children['foot'].children['newEntryInput'].addEventListener('keypress', (event) => { if (event.code == 'Enter') { appendEntry(event) } });
                 list.children['head'].children['headButtons'].children['deleteListButton'].addEventListener('click', deleteList);
                 list.children['head'].children['headButtons'].children['clearListButton'].addEventListener('click', clearList);
                 list.children['head'].children['headButtons'].children['renameListButton'].addEventListener('click', renameList);
